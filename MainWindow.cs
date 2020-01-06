@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace LegacyWorkshopFixer {
@@ -80,15 +76,15 @@ namespace LegacyWorkshopFixer {
         return false;
       }
 
-      DirectoryInfo talosBase = new DirectoryInfo(Path.GetDirectoryName(TalosLocation.Text));
+      DirectoryInfo dir = new DirectoryInfo(Path.GetDirectoryName(TalosLocation.Text));
       if (new DirectoryInfo(Path.GetDirectoryName(TalosLocation.Text)).Name == "x64") {
-        talosBase = talosBase.Parent.Parent;
+        dir = dir.Parent.Parent;
       } else {
-        talosBase = talosBase.Parent;
+        dir = dir.Parent;
       }
 
-      string manual = Path.Combine(talosBase.FullName, "Content", "Talos");
-      string workshop = Path.Combine(talosBase.Parent.Parent.FullName, "workshop", "content", "257510");
+      string manual = Path.Combine(dir.FullName, "Content", "Talos");
+      string workshop = Path.Combine(dir.Parent.Parent.FullName, "workshop", "content", "257510");
 
       if (!Directory.Exists(manual) || !Directory.Exists(workshop)) {
         return false;
@@ -100,14 +96,24 @@ namespace LegacyWorkshopFixer {
       return true;
     }
 
+    private static readonly IEnumerable<char> INVALID_FILE_CHARS = Path.GetInvalidFileNameChars().Union(Path.GetInvalidPathChars());
+    private static readonly string SYMLINK_PREFIX = "yy_";
+    private string GetModManualLocation(string name) {
+      string safeName = string.Concat(name.Where(c => !INVALID_FILE_CHARS.Contains(c)));
+      return Path.Combine(ManualDir, SYMLINK_PREFIX + safeName + ".gro");
+    }
+
     private void ReloadMods() {
       if (!HasValidDirs()) {
         return;
       }
 
-      // TODO: proper table
-      int y = 35;
-      foreach (string modDir in Directory.EnumerateDirectories(WorkshopDir)) {
+      List<string> existingSymlinks = Directory.EnumerateFiles(ManualDir).Where(
+        p => Symlink.IsSymlink(p) && Path.GetFileName(p).StartsWith(SYMLINK_PREFIX)
+      ).ToList();
+
+      List<ModEntry> allMods = new List<ModEntry>();
+      foreach (string modDir in Directory.EnumerateDirectories(WorkshopDir).Reverse()) {
         string gro = Directory.EnumerateFiles(modDir, "*.gro").FirstOrDefault();
         if (gro == null) {
           continue;
@@ -125,14 +131,34 @@ namespace LegacyWorkshopFixer {
           name = splitInfo[1];
         }
 
-        ModEntry mod = new ModEntry(name, gro, icon, false) {
-          Location = new Point(15, y),
-          Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-        };
-        y += 60;
-        Controls.Add(mod);
+        string symlink = GetModManualLocation(name);
+        existingSymlinks.Remove(symlink);
+
+        allMods.Add(new ModEntry(name, icon, gro, symlink));
+      }
+
+      // Using DockStyle.Top puts the most recently added item at the top, so sort in reverse
+      allMods.Sort((a, b) => b.ModName.CompareTo(a.ModName));
+      ModPanel.Controls.Clear();
+      foreach (ModEntry mod in allMods) {
+        mod.Dock = DockStyle.Top;
+        ModPanel.Controls.Add(mod);
+      }
+
+      // Symlinks of mods you've unsubsribed from
+      foreach (string symlink in existingSymlinks) {
+        try {
+          File.Delete(symlink);
+        } catch (IOException) { }
       }
     }
+
+    private void ShowInvalidInstallMessage() => MessageBox.Show(
+      "The selected path was not detected as a valid Talos install.",
+      "Invalid Talos Path",
+      MessageBoxButtons.OK,
+      MessageBoxIcon.Warning
+    );
 
     private void OpenFolderButton_Click(object sender, EventArgs e) {
       if (File.Exists(TalosLocation.Text)) {
@@ -141,7 +167,32 @@ namespace LegacyWorkshopFixer {
       TalosPicker.ShowDialog();
       TalosLocation.Text = TalosPicker.FileName;
 
+      if (!HasValidDirs()) {
+        ShowInvalidInstallMessage();
+        return;
+      }
+
       ReloadMods();
+    }
+
+    private void RefreshButton_Click(object sender, EventArgs e) {
+      // If you typed your own talos location check it's valid
+      if (TalosLocation.Text != TalosPicker.FileName) {
+        if (!HasValidDirs()) {
+          ShowInvalidInstallMessage();
+          return;
+        }
+      }
+
+      ReloadMods();
+    }
+
+    // If you press enter in the text box, try reload the mods
+    private void TalosLocation_KeyPress(object sender, KeyPressEventArgs e) {
+      if (e.KeyChar == (char) Keys.Return) {
+        e.Handled = true;
+        RefreshButton_Click(sender, e);
+      }
     }
   }
 }

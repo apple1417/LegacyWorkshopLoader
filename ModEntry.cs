@@ -1,27 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
 
 namespace LegacyWorkshopFixer {
   public partial class ModEntry : UserControl {
-    public string ModGro;
+    public string ModGroLocation;
+    public string ModManualLocation;
 
-    public ModEntry(string ModName, string ModGro, string ModIcon, bool IsModEnabled) {
+    public ModEntry() : this("Unknown Mod", null, null, null) { }
+    public ModEntry(string ModName, string ModIconPath, string ModGroLocation, string ModManualLocation) {
       InitializeComponent();
 
       this.ModName = ModName;
-      this.ModGro = ModGro;
+      this.ModGroLocation = ModGroLocation;
+      this.ModManualLocation = ModManualLocation;
 
-      this.IsModEnabled = IsModEnabled;
-      this.ModIcon = ModIcon;
+      SetModIcon(ModIconPath);
 
       _modIcon.BackColor = Color.FromArgb(0, 255, 255, 255);
     }
@@ -35,23 +31,24 @@ namespace LegacyWorkshopFixer {
       }
     }
 
-    private static readonly Image EnabledMissing = Image.FromHbitmap(Properties.Resources.Question.GetHbitmap());
+    private static readonly Image EnabledMissing = Image.FromHbitmap(Properties.Resources.MissingIcon.GetHbitmap());
     private static readonly Image DisabledMissing = ConvertToDisabledIcon(EnabledMissing);
 
     private Image EnabledIcon;
     private Image DisabledIcon;
-    public string ModIcon {
-      set {
-        if (File.Exists(value)) {
-          EnabledIcon = Image.FromFile(value);
-          DisabledIcon = ConvertToDisabledIcon(EnabledIcon);
-        } else {
-          EnabledIcon = EnabledMissing;
-          DisabledIcon = DisabledMissing;
+    public void SetModIcon(string path) {
+      if (File.Exists(path)) {
+        // Doing it like this releases the lock on the file
+        using (Image imgTmp = Image.FromFile(path)) {
+          EnabledIcon = new Bitmap(imgTmp);
         }
-
-        _modIcon.Image = IsModEnabled ? EnabledIcon : DisabledIcon;
+        DisabledIcon = ConvertToDisabledIcon(EnabledIcon);
+      } else {
+        EnabledIcon = EnabledMissing;
+        DisabledIcon = DisabledMissing;
       }
+
+      _modIcon.Image = IsModEnabled ? EnabledIcon : DisabledIcon;
     }
 
     private static Image ConvertToDisabledIcon(Image img) {
@@ -88,18 +85,15 @@ namespace LegacyWorkshopFixer {
       _modIcon.Width = _modIcon.Height;
     }
 
-    private static readonly Image Checkmark = Image.FromHbitmap(Properties.Resources.Checkmark.GetHbitmap());
-    private static readonly Image Cross = Image.FromHbitmap(Properties.Resources.Cross.GetHbitmap());
+    private static readonly Image ButtonEnabled = Image.FromHbitmap(Properties.Resources.ButtonEnabled.GetHbitmap());
+    private static readonly Image ButtonDisabled = Image.FromHbitmap(Properties.Resources.ButtonDisabled.GetHbitmap());
 
-    private bool _isModEnabled;
     public bool IsModEnabled {
       get {
-        return _isModEnabled;
-      }
-      private set {
-        _isModEnabled = value;
+        bool isEnabled = File.Exists(ModManualLocation);
+        _modButton.Image = isEnabled ? ButtonEnabled : ButtonDisabled;
 
-        _modButton.Image = _isModEnabled ? Cross : Checkmark;
+        return isEnabled;
       }
     }
     public event EventHandler OnModEnable;
@@ -107,16 +101,35 @@ namespace LegacyWorkshopFixer {
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles")]
     private void _modButton_Click(object sender, EventArgs e) {
-      IsModEnabled = !IsModEnabled;
+      try {
+        if (IsModEnabled) {
+          File.Delete(ModManualLocation);
+        } else {
+          Symlink.Create(ModGroLocation, ModManualLocation);
+        }
+
+      // TODO: possibly other exceptions?
+      } catch (Exception ex) when (
+           ex is ArgumentException
+        || ex is IOException
+        || ex is NotSupportedException
+        || ex is UnauthorizedAccessException
+      ) {
+        MessageBox.Show(
+          "An error occured while changing mod state:" + Environment.NewLine + ex.Message,
+          "Error",
+          MessageBoxButtons.OK,
+          MessageBoxIcon.Error
+        );
+        return;
+      }
 
       if (IsModEnabled) {
-        OnModEnable?.Invoke(this, EventArgs.Empty);
-
         _modIcon.Image = EnabledIcon;
+        OnModEnable?.Invoke(this, EventArgs.Empty);
       } else {
-        OnModDisable?.Invoke(this, EventArgs.Empty);
-
         _modIcon.Image = DisabledIcon;
+        OnModDisable?.Invoke(this, EventArgs.Empty);
       }
     }
   }

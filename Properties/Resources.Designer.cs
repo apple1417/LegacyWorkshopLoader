@@ -63,9 +63,9 @@ namespace LegacyWorkshopFixer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Checkmark {
+        internal static System.Drawing.Bitmap ButtonDisabled {
             get {
-                object obj = ResourceManager.GetObject("Checkmark", resourceCulture);
+                object obj = ResourceManager.GetObject("ButtonDisabled", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,19 @@ namespace LegacyWorkshopFixer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap Cross {
+        internal static System.Drawing.Bitmap ButtonEnabled {
             get {
-                object obj = ResourceManager.GetObject("Cross", resourceCulture);
+                object obj = ResourceManager.GetObject("ButtonEnabled", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap MissingIcon {
+            get {
+                object obj = ResourceManager.GetObject("MissingIcon", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -86,16 +96,6 @@ namespace LegacyWorkshopFixer.Properties {
         internal static System.Drawing.Bitmap OpenFile {
             get {
                 object obj = ResourceManager.GetObject("OpenFile", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap Question {
-            get {
-                object obj = ResourceManager.GetObject("Question", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -23,7 +23,6 @@
     /// the contents of this method with the code editor.
     /// </summary>
     private void InitializeComponent() {
-      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ModEntry));
       this._modIcon = new System.Windows.Forms.PictureBox();
       this._modButton = new System.Windows.Forms.Button();
       this._modName = new System.Windows.Forms.Label();
@@ -44,7 +43,7 @@
       // _modButton
       // 
       this._modButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-      this._modButton.Image = ((System.Drawing.Image)(resources.GetObject("_modButton.Image")));
+      this._modButton.Image = global::LegacyWorkshopFixer.Properties.Resources.ButtonDisabled;
       this._modButton.Location = new System.Drawing.Point(273, 16);
       this._modButton.Name = "_modButton";
       this._modButton.Size = new System.Drawing.Size(24, 24);
