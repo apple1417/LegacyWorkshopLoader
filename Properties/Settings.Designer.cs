@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace LegacyWorkshopFixer.Properties {
+namespace LegacyWorkshopLoader.Properties {
 
 
   [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

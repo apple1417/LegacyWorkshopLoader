@@ -1,4 +1,4 @@
-﻿namespace LegacyWorkshopFixer {
+﻿namespace LegacyWorkshopLoader {
   partial class MainWindow {
     /// <summary>
     /// Required designer variable.
@@ -48,7 +48,7 @@
       // RefreshButton
       // 
       this.RefreshButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-      this.RefreshButton.Image = global::LegacyWorkshopFixer.Properties.Resources.Refresh;
+      this.RefreshButton.Image = global::LegacyWorkshopLoader.Properties.Resources.Refresh;
       this.RefreshButton.Location = new System.Drawing.Point(348, 10);
       this.RefreshButton.Name = "RefreshButton";
       this.RefreshButton.Size = new System.Drawing.Size(24, 24);
@@ -60,7 +60,7 @@
       // 
       this.OpenTalosButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
       this.OpenTalosButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-      this.OpenTalosButton.Image = global::LegacyWorkshopFixer.Properties.Resources.OpenFile;
+      this.OpenTalosButton.Image = global::LegacyWorkshopLoader.Properties.Resources.OpenFile;
       this.OpenTalosButton.Location = new System.Drawing.Point(318, 10);
       this.OpenTalosButton.Name = "OpenTalosButton";
       this.OpenTalosButton.Size = new System.Drawing.Size(24, 24);
@@ -91,7 +91,7 @@
       this.Controls.Add(this.TalosLocation);
       this.MinimumSize = new System.Drawing.Size(398, 300);
       this.Name = "MainWindow";
-      this.Text = "Legacy Workshop Fixer";
+      this.Text = "Legacy Workshop Loader";
       this.ResumeLayout(false);
       this.PerformLayout();
 

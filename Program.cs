@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace LegacyWorkshopFixer {
+namespace LegacyWorkshopLoader {
   static class Program {
     [STAThread]
     static void Main() {

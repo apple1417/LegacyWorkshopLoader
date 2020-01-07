@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace LegacyWorkshopFixer {
+namespace LegacyWorkshopLoader {
   public static class Symlink {
     public static void Create(string fromFile, string linkLocation) {
       if (!File.Exists(fromFile)) {

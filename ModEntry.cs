@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using System.IO;
 using System.Drawing.Imaging;
 
-namespace LegacyWorkshopFixer {
+namespace LegacyWorkshopLoader {
   public partial class ModEntry : UserControl {
     public string ModGroLocation;
     public string ModManualLocation;

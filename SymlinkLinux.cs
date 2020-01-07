@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace LegacyWorkshopFixer {
+namespace LegacyWorkshopLoader {
   public static class SymlinkLinux {
 #pragma warning disable IDE1006 // Naming Styles
     [DllImport("MonoPosixHelper", SetLastError = true, EntryPoint = "Mono_Posix_Syscall_lstat")]

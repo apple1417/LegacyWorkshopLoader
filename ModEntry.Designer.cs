@@ -1,4 +1,4 @@
-﻿namespace LegacyWorkshopFixer {
+﻿namespace LegacyWorkshopLoader {
   partial class ModEntry {
     /// <summary> 
     /// Required designer variable.
@@ -43,7 +43,7 @@
       // _modButton
       // 
       this._modButton.Anchor = System.Windows.Forms.AnchorStyles.None;
-      this._modButton.Image = global::LegacyWorkshopFixer.Properties.Resources.ButtonDisabled;
+      this._modButton.Image = global::LegacyWorkshopLoader.Properties.Resources.ButtonDisabled;
       this._modButton.Location = new System.Drawing.Point(273, 16);
       this._modButton.Name = "_modButton";
       this._modButton.Size = new System.Drawing.Size(24, 24);

@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
-namespace LegacyWorkshopFixer {
+namespace LegacyWorkshopLoader {
   public partial class MainWindow : Form {
     public MainWindow() {
       InitializeComponent();
