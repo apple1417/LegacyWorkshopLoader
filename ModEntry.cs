@@ -108,7 +108,6 @@ namespace LegacyWorkshopFixer {
           Symlink.Create(ModGroLocation, ModManualLocation);
         }
 
-      // TODO: possibly other exceptions?
       } catch (Exception ex) when (
            ex is ArgumentException
         || ex is IOException
@@ -116,7 +115,7 @@ namespace LegacyWorkshopFixer {
         || ex is UnauthorizedAccessException
       ) {
         MessageBox.Show(
-          "An error occured while changing mod state:" + Environment.NewLine + ex.Message,
+          "An error occured while changing mod state: " + ex.Message,
           "Error",
           MessageBoxButtons.OK,
           MessageBoxIcon.Error

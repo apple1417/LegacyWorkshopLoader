@@ -22,7 +22,7 @@ namespace LegacyWorkshopFixer {
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
         steamapps = @"C:\Program Files (x86)\Steam\steamapps";
       } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
-        steamapps = @"~/.steam/steam/SteamApps";
+        steamapps = @"~/.steam/steam/steamapps";
       } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
         steamapps = @"~/Library/Application Support/Steam/steamapps";
       } else {
@@ -97,7 +97,7 @@ namespace LegacyWorkshopFixer {
     }
 
     private static readonly IEnumerable<char> INVALID_FILE_CHARS = Path.GetInvalidFileNameChars().Union(Path.GetInvalidPathChars());
-    private static readonly string SYMLINK_PREFIX = "yy_";
+    private static readonly string SYMLINK_PREFIX = "zz_";
     private string GetModManualLocation(string name) {
       string safeName = string.Concat(name.Where(c => !INVALID_FILE_CHARS.Contains(c)));
       return Path.Combine(ManualDir, SYMLINK_PREFIX + safeName + ".gro");
@@ -109,7 +109,7 @@ namespace LegacyWorkshopFixer {
       }
 
       List<string> existingSymlinks = Directory.EnumerateFiles(ManualDir).Where(
-        p => Symlink.IsSymlink(p) && Path.GetFileName(p).StartsWith(SYMLINK_PREFIX)
+        p => Path.GetFileName(p).StartsWith(SYMLINK_PREFIX) && Symlink.IsSymlink(p) && !File.Exists(Symlink.TargetOf(p))
       ).ToList();
 
       List<ModEntry> allMods = new List<ModEntry>();
@@ -123,13 +123,8 @@ namespace LegacyWorkshopFixer {
         string icon = Path.Combine(modDir, modId + ".jpg");
         string infoFile = Path.Combine(modDir, modId + ".txt");
 
-        string name;
-        string[] splitInfo = File.ReadAllText(infoFile).Split('#');
-        if (splitInfo.Length < 2) {
-          name = "Unknown Mod";
-        } else {
-          name = splitInfo[1];
-        }
+        Match nameMatch = Regex.Match(File.ReadAllText(infoFile), "^.+?#(.+?)#");
+        string name = nameMatch.Success ? nameMatch.Groups[1].Value : "Unknown Mod " + modId;
 
         string symlink = GetModManualLocation(name);
         existingSymlinks.Remove(symlink);
@@ -145,11 +140,11 @@ namespace LegacyWorkshopFixer {
         ModPanel.Controls.Add(mod);
       }
 
-      // Symlinks of mods you've unsubsribed from
+      // Symlinks of mods that were active but you've unsubsribed from
       foreach (string symlink in existingSymlinks) {
         try {
           File.Delete(symlink);
-        } catch (IOException) { }
+        } catch (Exception e) when (e is IOException || e is UnauthorizedAccessException) { }
       }
     }
 
