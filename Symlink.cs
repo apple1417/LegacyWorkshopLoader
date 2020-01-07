@@ -13,13 +13,16 @@ namespace LegacyWorkshopFixer {
         throw new IOException("Symlink target already exists");
       }
 
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-        try {
-          SymlinkWin.Create(fromFile, linkLocation);
+      try {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+          SymlinkWindows.Create(fromFile, linkLocation);
           return;
-        } catch (Win32Exception e) {
-          throw new IOException(e.Message);
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+          SymlinkLinux.Create(fromFile, linkLocation);
+          return;
         }
+      } catch (Win32Exception e) {
+        throw new IOException(e.Message);
       }
 
       throw new PlatformNotSupportedException();
@@ -30,12 +33,14 @@ namespace LegacyWorkshopFixer {
         return false;
       }
 
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-        try {
-          return SymlinkWin.IsSymlink(path);
-        } catch (Win32Exception e) {
-          throw new IOException(e.Message);
+      try {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+          return SymlinkWindows.IsSymlink(path);
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+          return SymlinkLinux.IsSymlink(path);
         }
+      } catch (Win32Exception e) {
+        throw new IOException(e.Message);
       }
 
       throw new PlatformNotSupportedException();
@@ -46,12 +51,14 @@ namespace LegacyWorkshopFixer {
         throw new FileNotFoundException("File not found");
       }
 
-      if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-        try {
-          return SymlinkWin.TargetOf(link);
-        } catch (Win32Exception e) {
-          throw new IOException(e.Message);
+      try {
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+          return SymlinkWindows.TargetOf(link);
+        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+          return SymlinkLinux.TargetOf(link);
         }
+      } catch (Win32Exception e) {
+        throw new IOException(e.Message);
       }
 
       throw new PlatformNotSupportedException();

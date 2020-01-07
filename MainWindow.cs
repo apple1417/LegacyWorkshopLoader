@@ -22,9 +22,9 @@ namespace LegacyWorkshopFixer {
       if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
         steamapps = @"C:\Program Files (x86)\Steam\steamapps";
       } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
-        steamapps = @"~/.steam/steam/steamapps";
+        steamapps = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), @".steam/steam/steamapps");
       } else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
-        steamapps = @"~/Library/Application Support/Steam/steamapps";
+        steamapps = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Personal), @"Library/Application Support/Steam/steamapps");
       } else {
         return false;
       }
@@ -51,7 +51,7 @@ namespace LegacyWorkshopFixer {
           continue;
         }
 
-        string bin = Path.Combine(dir, "common", "The Talos Principle", "bin");
+        string bin = Path.Combine(dir, "common", "The Talos Principle", "Bin");
         if (!Directory.Exists(bin)) {
           return false;
         }
@@ -159,7 +159,12 @@ namespace LegacyWorkshopFixer {
       if (File.Exists(TalosLocation.Text)) {
         TalosPicker.InitialDirectory = Path.GetDirectoryName(TalosLocation.Text);
       }
-      TalosPicker.ShowDialog();
+
+      DialogResult result = TalosPicker.ShowDialog();
+      if (result != DialogResult.OK) {
+        return;
+      }
+
       TalosLocation.Text = TalosPicker.FileName;
 
       if (!HasValidDirs()) {

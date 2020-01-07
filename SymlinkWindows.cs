@@ -1,21 +1,21 @@
-﻿using Microsoft.Win32.SafeHandles;
-using System;
+﻿using System;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
 
 namespace LegacyWorkshopFixer {
-  public static class SymlinkWin {
+  public static class SymlinkWindows {
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern SafeFileHandle CreateFileW(
+    private static extern IntPtr CreateFileW(
       string lpFileName,
       Int32 dwDesiredAccess,
       Int32 dwShareMode,
       IntPtr lpSecurityAttributes,
       Int32 dwCreationDisposition,
       Int32 dwFlagsAndAttributes,
-      SafeFileHandle hTemplateFile
+      IntPtr hTemplateFile
     );
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -26,16 +26,16 @@ namespace LegacyWorkshopFixer {
     );
 
     [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool CloseHandle(SafeHandle hObject);
+    private static extern bool CloseHandle(IntPtr hObject);
 
     [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern bool FindClose(SafeFileHandle hFindFile);
+    private static extern bool FindClose(IntPtr hFindFile);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern SafeFileHandle FindFirstFileW(string lpFileName, ref LPWIN32_FIND_DATAW lpFindFileData);
+    private static extern IntPtr FindFirstFileW(string lpFileName, ref LPWIN32_FIND_DATAW lpFindFileData);
 
     [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-    private static extern Int32 GetFinalPathNameByHandleW(SafeFileHandle hFile, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lpszFilePath, Int32 cchFilePath, Int32 dwFlags);
+    private static extern Int32 GetFinalPathNameByHandleW(IntPtr hFile, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lpszFilePath, Int32 cchFilePath, Int32 dwFlags);
 
     [StructLayout(LayoutKind.Sequential)]
     private struct LPWIN32_FIND_DATAW {
@@ -59,9 +59,7 @@ namespace LegacyWorkshopFixer {
       public Int16 wFinderFlags;
     }
 
-    private static readonly SafeFileHandle NULL_PTR = new SafeFileHandle(IntPtr.Zero, true);
-
-    private static readonly SafeFileHandle INVALID_HANDLE_VALUE = new SafeFileHandle(new IntPtr(-1), true);
+    private static readonly IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
     private const Int32 MAX_PATH = 260;
     private const Int32 MAX_PATH_WIDE = 32767;
 
@@ -72,6 +70,27 @@ namespace LegacyWorkshopFixer {
 
     private const Int32 ERROR_ACCESS_DENIED = 5;
 
+    private static Exception LastError() {
+      int errno = Marshal.GetLastWin32Error();
+      string msg = "Windows error: " + new Win32Exception(errno).Message;
+
+      switch (errno) {
+        case  2: /* ERROR_FILE_NOT_FOUND */ return new FileNotFoundException(msg);
+
+        case  3: // ERROR_PATH_NOT_FOUND */
+        case  6: /* ERROR_INVALID_HANDLE */ return new IOException(msg);
+
+        case  5: /* ERROR_ACCESS_DENIED */ return new UnauthorizedAccessException(msg);
+
+        case  8: /* ERROR_NOT_ENOUGH_MEMORY */ return new OutOfMemoryException(msg);
+
+        case 87: /* ERROR_INVALID_PARAMETER */
+          return new ArgumentException(msg);
+
+        default: return new Win32Exception(errno, msg);
+      }
+    }
+
     public static bool IsAdmin => new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
 
     public static void Create(string fromFile, string linkLocation) {
@@ -81,16 +100,16 @@ namespace LegacyWorkshopFixer {
 
       bool success = CreateSymbolicLinkW(linkLocation, fromFile, 0);
       if (!success) {
-        throw new Win32Exception(Marshal.GetLastWin32Error());
+        throw LastError();
       }
     }
 
     public static bool IsSymlink(string path) {
       LPWIN32_FIND_DATAW fileData = new LPWIN32_FIND_DATAW();
-      SafeFileHandle handle = FindFirstFileW(path, ref fileData);
+      IntPtr handle = FindFirstFileW(path, ref fileData);
 
       if (handle == INVALID_HANDLE_VALUE) {
-        throw new Win32Exception(Marshal.GetLastWin32Error());
+        throw LastError();
       }
 
       bool isSymlink;
@@ -102,27 +121,34 @@ namespace LegacyWorkshopFixer {
 
       bool success = FindClose(handle);
       if (!success) {
-        throw new Win32Exception(Marshal.GetLastWin32Error());
+        throw LastError();
       }
 
       return isSymlink;
     }
 
     public static string TargetOf(string link) {
-      SafeFileHandle handle = CreateFileW(link, 0, 0, IntPtr.Zero, OPEN_EXISTING, 0, NULL_PTR);
+      IntPtr handle = CreateFileW(link, 0, 0, IntPtr.Zero, OPEN_EXISTING, 0, IntPtr.Zero);
       if (handle == INVALID_HANDLE_VALUE) {
-        throw  new Win32Exception(Marshal.GetLastWin32Error());
+        throw LastError();
       }
 
       StringBuilder target = new StringBuilder(MAX_PATH_WIDE);
       Int32 len = GetFinalPathNameByHandleW(handle, target, target.Capacity, 0);
+
+      // If we got an invalid length then temporarily store the error so that we can close the handle first
+      Exception ex = null;
       if (len == 0) {
-        throw new Win32Exception(Marshal.GetLastWin32Error());
+        ex = LastError();
       }
 
       bool success = CloseHandle(handle);
+      if (len == 0) {
+        throw ex;
+      }
+
       if (!success) {
-        throw new Win32Exception(Marshal.GetLastWin32Error());
+        throw LastError();
       }
 
       // Remove the "\\?\" at the start
