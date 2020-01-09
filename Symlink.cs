@@ -17,7 +17,7 @@ namespace LegacyWorkshopLoader {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
           SymlinkWindows.Create(fromFile, linkLocation);
           return;
-        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+        } else /*if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))*/ {
           SymlinkLinux.Create(fromFile, linkLocation);
           return;
         }
@@ -25,7 +25,7 @@ namespace LegacyWorkshopLoader {
         throw new IOException(e.Message);
       }
 
-      throw new PlatformNotSupportedException();
+      //throw new PlatformNotSupportedException();
     }
 
     public static bool IsSymlink(string path) {
@@ -36,14 +36,14 @@ namespace LegacyWorkshopLoader {
       try {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
           return SymlinkWindows.IsSymlink(path);
-        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+        } else /*if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))*/ {
           return SymlinkLinux.IsSymlink(path);
         }
       } catch (Win32Exception e) {
         throw new IOException(e.Message);
       }
 
-      throw new PlatformNotSupportedException();
+      //throw new PlatformNotSupportedException();
     }
 
     public static string TargetOf(string link) {
@@ -54,14 +54,14 @@ namespace LegacyWorkshopLoader {
       try {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
           return SymlinkWindows.TargetOf(link);
-        } else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+        } else /*if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))*/ {
           return SymlinkLinux.TargetOf(link);
         }
       } catch (Win32Exception e) {
         throw new IOException(e.Message);
       }
 
-      throw new PlatformNotSupportedException();
+      //throw new PlatformNotSupportedException();
     }
   }
 }
