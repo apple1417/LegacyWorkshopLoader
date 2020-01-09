@@ -123,6 +123,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Icon.ico" />
+    <None Include="Readme.md" />
     <None Include="Resources\Refresh.png" />
     <None Include="Resources\ButtonEnabled.png" />
     <None Include="Resources\ButtonDisabled.png" />
