@@ -23,6 +23,7 @@
     /// the contents of this method with the code editor.
     /// </summary>
     private void InitializeComponent() {
+      System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
       this.TalosLocation = new System.Windows.Forms.TextBox();
       this.TalosPicker = new System.Windows.Forms.OpenFileDialog();
       this.RefreshButton = new System.Windows.Forms.Button();
@@ -89,6 +90,7 @@
       this.Controls.Add(this.RefreshButton);
       this.Controls.Add(this.OpenTalosButton);
       this.Controls.Add(this.TalosLocation);
+      this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.MinimumSize = new System.Drawing.Size(398, 300);
       this.Name = "MainWindow";
       this.Text = "Legacy Workshop Loader";
