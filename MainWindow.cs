@@ -108,9 +108,13 @@ namespace LegacyWorkshopLoader {
         return;
       }
 
-      List<string> existingSymlinks = Directory.EnumerateFiles(ManualDir).Where(
-        p => Path.GetFileName(p).StartsWith(SYMLINK_PREFIX) && Symlink.IsSymlink(p) && !File.Exists(Symlink.TargetOf(p))
-      ).ToList();
+      // I'd love to use LINQ for this but somehow it causes null reference exceptions if optimize code is enabled
+      List<string> existingSymlinks = new List<string>();
+      foreach (string file in Directory.EnumerateFiles(ManualDir)) {
+        if (Path.GetFileName(file).StartsWith(SYMLINK_PREFIX) && Symlink.IsSymlink(file) && File.Exists(Symlink.TargetOf(file))) {
+          existingSymlinks.Add(file);
+        }
+      }
 
       List<ModEntry> allMods = new List<ModEntry>();
       foreach (string modDir in Directory.EnumerateDirectories(WorkshopDir).Reverse()) {
