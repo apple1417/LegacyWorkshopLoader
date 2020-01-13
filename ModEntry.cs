@@ -6,18 +6,17 @@ using System.Drawing.Imaging;
 
 namespace LegacyWorkshopLoader {
   public partial class ModEntry : UserControl {
-    public string ModGroLocation;
-    public string ModManualLocation;
+    public string ModGroPath;
+    public string ModManualPath;
 
     public ModEntry() : this("Unknown Mod", null, null, null) { }
-    public ModEntry(string ModName, string ModIconPath, string ModGroLocation, string ModManualLocation) {
+    public ModEntry(string ModName, string ModIconPath, string ModGroPath, string ModManualPath) {
       InitializeComponent();
 
       this.ModName = ModName;
-      this.ModGroLocation = ModGroLocation;
-      this.ModManualLocation = ModManualLocation;
-
-      SetModIcon(ModIconPath);
+      this.ModIconPath = ModIconPath;
+      this.ModGroPath = ModGroPath;
+      this.ModManualPath = ModManualPath;
 
       _modIcon.BackColor = Color.FromArgb(0, 255, 255, 255);
     }
@@ -36,19 +35,30 @@ namespace LegacyWorkshopLoader {
 
     private Image EnabledIcon;
     private Image DisabledIcon;
-    public void SetModIcon(string path) {
-      if (File.Exists(path)) {
-        // Doing it like this releases the lock on the file
-        using (Image imgTmp = Image.FromFile(path)) {
-          EnabledIcon = new Bitmap(imgTmp);
-        }
-        DisabledIcon = ConvertToDisabledIcon(EnabledIcon);
-      } else {
-        EnabledIcon = EnabledMissing;
-        DisabledIcon = DisabledMissing;
-      }
 
-      _modIcon.Image = IsModEnabled ? EnabledIcon : DisabledIcon;
+    private string _modIconPath;
+    public string ModIconPath {
+      get {
+        return _modIconPath;
+      }
+      set {
+        if (File.Exists(value)) {
+          // Doing it like this releases the lock on the file
+          using (Image imgTmp = Image.FromFile(value)) {
+            EnabledIcon = new Bitmap(imgTmp);
+          }
+          DisabledIcon = ConvertToDisabledIcon(EnabledIcon);
+
+          _modIconPath = value;
+        } else {
+          EnabledIcon = EnabledMissing;
+          DisabledIcon = DisabledMissing;
+
+          _modIconPath = null;
+        }
+
+        _modIcon.Image = IsModEnabled ? EnabledIcon : DisabledIcon;
+      }
     }
 
     private static Image ConvertToDisabledIcon(Image img) {
@@ -90,7 +100,7 @@ namespace LegacyWorkshopLoader {
 
     public bool IsModEnabled {
       get {
-        bool isEnabled = File.Exists(ModManualLocation);
+        bool isEnabled = File.Exists(ModManualPath);
         _modButton.Image = isEnabled ? ButtonEnabled : ButtonDisabled;
 
         return isEnabled;
@@ -103,9 +113,9 @@ namespace LegacyWorkshopLoader {
     private void _modButton_Click(object sender, EventArgs e) {
       try {
         if (IsModEnabled) {
-          File.Delete(ModManualLocation);
+          File.Delete(ModManualPath);
         } else {
-          Symlink.Create(ModGroLocation, ModManualLocation);
+          Symlink.Create(ModGroPath, ModManualPath);
         }
 
       } catch (Exception ex) when (
@@ -131,5 +141,7 @@ namespace LegacyWorkshopLoader {
         OnModDisable?.Invoke(this, EventArgs.Empty);
       }
     }
+
+    public override string ToString() => ModName;
   }
 }

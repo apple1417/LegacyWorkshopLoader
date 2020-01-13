@@ -29,6 +29,7 @@
       this.RefreshButton = new System.Windows.Forms.Button();
       this.OpenTalosButton = new System.Windows.Forms.Button();
       this.ModPanel = new System.Windows.Forms.Panel();
+      this.unsubscribeLabel = new System.Windows.Forms.Label();
       this.SuspendLayout();
       // 
       // TalosLocation
@@ -78,14 +79,27 @@
       this.ModPanel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
       this.ModPanel.Location = new System.Drawing.Point(12, 38);
       this.ModPanel.Name = "ModPanel";
-      this.ModPanel.Size = new System.Drawing.Size(360, 411);
+      this.ModPanel.Size = new System.Drawing.Size(360, 394);
       this.ModPanel.TabIndex = 3;
+      // 
+      // unsubscribeLabel
+      // 
+      this.unsubscribeLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+      this.unsubscribeLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+      this.unsubscribeLabel.Location = new System.Drawing.Point(12, 435);
+      this.unsubscribeLabel.Name = "unsubscribeLabel";
+      this.unsubscribeLabel.Size = new System.Drawing.Size(358, 17);
+      this.unsubscribeLabel.TabIndex = 4;
+      this.unsubscribeLabel.Text = "Make sure to unsubscribe from these mods";
+      this.unsubscribeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
       // 
       // MainWindow
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(382, 461);
+      this.Controls.Add(this.unsubscribeLabel);
       this.Controls.Add(this.ModPanel);
       this.Controls.Add(this.RefreshButton);
       this.Controls.Add(this.OpenTalosButton);
@@ -106,6 +120,7 @@
         private System.Windows.Forms.Button RefreshButton;
         private System.Windows.Forms.OpenFileDialog TalosPicker;
         private System.Windows.Forms.Panel ModPanel;
+        private System.Windows.Forms.Label unsubscribeLabel;
     }
 }
 
